@@ -1,0 +1,11 @@
+﻿@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div>
+	<h1 class="display-4">@ViewBag.Welcome</h1>
+
+	<div class="row">
+		@await Html.PartialAsync("_Conditions");
+	</div>
+</div>
