@@ -5,11 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DSD603VM2025.Controllers
 {
-    public class HomeController(ITextFileOperations textFileOperations) : Controller
+    public class HomeController(ITextFileOperations textFileOperations, IDataSeeder dataSeeder) : Controller
     {
         public IActionResult Index()
         {
             ViewBag.Welcome = "Welcome to the VMS";
+            dataSeeder.SeedAsync();
 
             ViewData["Conditions"] = textFileOperations.LoadConditionsOfAcceptance();
 
