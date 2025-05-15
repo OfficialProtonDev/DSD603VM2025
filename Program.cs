@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<ITextFileOperations, TextFileOperations>();
 builder.Services.AddTransient<IDataSeeder, DataSeeder>();
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Password settings.

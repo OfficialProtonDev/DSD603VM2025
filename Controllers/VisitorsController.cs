@@ -7,23 +7,22 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DSD603VM2025.Data;
 using DSD603VM2025.Models;
+using AutoMapper;
+using DSD603VM2025.ViewModels;
 
 namespace DSD603VM2025.Controllers
 {
-    public class VisitorsController : Controller
+    public class VisitorsController(ApplicationDbContext context, IMapper mapper) : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public VisitorsController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
 
         // GET: Visitors
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Visitors.Include(v => v.StaffName);
-            return View(await applicationDbContext.ToListAsync());
+
+            // Map Visitors to view model
+            var visitorsVM = mapper.Map<IEnumerable<VisitorsVM>>(await context.Visitors.Include(v => v.StaffName).ToListAsync());
+
+            return View(visitorsVM);
         }
 
         // GET: Visitors/Details/5
@@ -34,7 +33,7 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            var visitors = await _context.Visitors
+            var visitors = await context.Visitors
                 .Include(v => v.StaffName)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (visitors == null)
@@ -42,18 +41,24 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            return View(visitors);
+            // Map Visitors to view model
+            var visitorsVM = mapper.Map<VisitorsVM>(visitors);
+
+            return View(visitorsVM);
         }
 
         // GET: Visitors/Create
         public IActionResult Create()
         {
-            ViewData["StaffNameId"] = new SelectList(_context.StaffNames, "Id", "Name");
+            ViewData["StaffNameId"] = new SelectList(context.StaffNames, "Id", "Name");
 
             Visitors visitors = new Visitors();
             visitors.DateIn = DateTime.Now;
 
-            return View(visitors);
+            // Map Visitors to view model
+            var visitorsVM = mapper.Map<VisitorsVM>(visitors);
+
+            return View(visitorsVM);
         }
 
         // POST: Visitors/Create
@@ -66,12 +71,16 @@ namespace DSD603VM2025.Controllers
             if (ModelState.IsValid)
             {
                 visitors.Id = Guid.NewGuid();
-                _context.Add(visitors);
-                await _context.SaveChangesAsync();
+                context.Add(visitors);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["StaffNameId"] = new SelectList(_context.StaffNames, "Id", "Id", visitors.StaffNameId);
-            return View(visitors);
+            ViewData["StaffNameId"] = new SelectList(context.StaffNames, "Id", "Id", visitors.StaffNameId);
+
+            // Map Visitors to view model
+            var visitorsVM = mapper.Map<VisitorsVM>(visitors);
+
+            return View(visitorsVM);
         }
 
         // GET: Visitors/Edit/5
@@ -82,13 +91,17 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            var visitors = await _context.Visitors.FindAsync(id);
+            var visitors = await context.Visitors.FindAsync(id);
             if (visitors == null)
             {
                 return NotFound();
             }
-            ViewData["StaffNameId"] = new SelectList(_context.StaffNames, "Id", "Name", visitors.StaffNameId);
-            return View(visitors);
+            ViewData["StaffNameId"] = new SelectList(context.StaffNames, "Id", "Name", visitors.StaffNameId);
+
+            // Map Visitors to view model
+            var visitorsVM = mapper.Map<VisitorsVM>(visitors);
+
+            return View(visitorsVM);
         }
 
         // POST: Visitors/Edit/5
@@ -107,8 +120,8 @@ namespace DSD603VM2025.Controllers
             {
                 try
                 {
-                    _context.Update(visitors);
-                    await _context.SaveChangesAsync();
+                    context.Update(visitors);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -123,8 +136,12 @@ namespace DSD603VM2025.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["StaffNameId"] = new SelectList(_context.StaffNames, "Id", "Id", visitors.StaffNameId);
-            return View(visitors);
+            ViewData["StaffNameId"] = new SelectList(context.StaffNames, "Id", "Id", visitors.StaffNameId);
+
+            // Map Visitors to view model
+            var visitorsVM = mapper.Map<VisitorsVM>(visitors);
+
+            return View(visitorsVM);
         }
 
         // GET: Visitors/Delete/5
@@ -135,7 +152,7 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            var visitors = await _context.Visitors
+            var visitors = await context.Visitors
                 .Include(v => v.StaffName)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (visitors == null)
@@ -143,7 +160,10 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            return View(visitors);
+            // Map Visitors to view model
+            var visitorsVM = mapper.Map<VisitorsVM>(visitors);
+
+            return View(visitorsVM);
         }
 
         // POST: Visitors/Delete/5
@@ -151,19 +171,19 @@ namespace DSD603VM2025.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var visitors = await _context.Visitors.FindAsync(id);
+            var visitors = await context.Visitors.FindAsync(id);
             if (visitors != null)
             {
-                _context.Visitors.Remove(visitors);
+                context.Visitors.Remove(visitors);
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool VisitorsExists(Guid id)
         {
-            return _context.Visitors.Any(e => e.Id == id);
+            return context.Visitors.Any(e => e.Id == id);
         }
     }
 }

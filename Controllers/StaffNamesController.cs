@@ -7,22 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DSD603VM2025.Data;
 using DSD603VM2025.Models;
+using AutoMapper;
+using DSD603VM2025.ViewModels;
 
 namespace DSD603VM2025.Controllers
 {
-    public class StaffNamesController : Controller
+    public class StaffNamesController(ApplicationDbContext context, IMapper mapper) : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public StaffNamesController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
 
         // GET: StaffNames
         public async Task<IActionResult> Index()
         {
-            return View(await _context.StaffNames.ToListAsync());
+            // Map StaffNames to view model
+            var staffNamesVM = mapper.Map<IEnumerable<StaffNamesVM>>(await context.StaffNames.ToListAsync());
+
+            return View(staffNamesVM);
         }
 
         // GET: StaffNames/Details/5
@@ -33,14 +32,17 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            var staffNames = await _context.StaffNames
+            var staffNames = await context.StaffNames
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (staffNames == null)
             {
                 return NotFound();
             }
 
-            return View(staffNames);
+            // Map StaffNames to view model
+            var staffNamesVM = mapper.Map<StaffNamesVM>(staffNames);
+
+            return View(staffNamesVM);
         }
 
         // GET: StaffNames/Create
@@ -59,11 +61,15 @@ namespace DSD603VM2025.Controllers
             if (ModelState.IsValid)
             {
                 staffNames.Id = Guid.NewGuid();
-                _context.Add(staffNames);
-                await _context.SaveChangesAsync();
+                context.Add(staffNames);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(staffNames);
+
+            // Map StaffNames to view model
+            var staffNamesVM = mapper.Map<StaffNamesVM>(staffNames);
+
+            return View(staffNamesVM);
         }
 
         // GET: StaffNames/Edit/5
@@ -74,12 +80,16 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            var staffNames = await _context.StaffNames.FindAsync(id);
+            var staffNames = await context.StaffNames.FindAsync(id);
             if (staffNames == null)
             {
                 return NotFound();
             }
-            return View(staffNames);
+
+            // Map StaffNames to view model
+            var staffNamesVM = mapper.Map<StaffNamesVM>(staffNames);
+
+            return View(staffNamesVM);
         }
 
         // POST: StaffNames/Edit/5
@@ -98,8 +108,8 @@ namespace DSD603VM2025.Controllers
             {
                 try
                 {
-                    _context.Update(staffNames);
-                    await _context.SaveChangesAsync();
+                    context.Update(staffNames);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -114,7 +124,11 @@ namespace DSD603VM2025.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(staffNames);
+
+            // Map StaffNames to view model
+            var staffNamesVM = mapper.Map<StaffNamesVM>(staffNames);
+
+            return View(staffNamesVM);
         }
 
         // GET: StaffNames/Delete/5
@@ -125,14 +139,17 @@ namespace DSD603VM2025.Controllers
                 return NotFound();
             }
 
-            var staffNames = await _context.StaffNames
+            var staffNames = await context.StaffNames
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (staffNames == null)
             {
                 return NotFound();
             }
 
-            return View(staffNames);
+            // Map StaffNames to view model
+            var staffNamesVM = mapper.Map<StaffNamesVM>(staffNames);
+
+            return View(staffNamesVM);
         }
 
         // POST: StaffNames/Delete/5
@@ -140,19 +157,19 @@ namespace DSD603VM2025.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var staffNames = await _context.StaffNames.FindAsync(id);
+            var staffNames = await context.StaffNames.FindAsync(id);
             if (staffNames != null)
             {
-                _context.StaffNames.Remove(staffNames);
+                context.StaffNames.Remove(staffNames);
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool StaffNamesExists(Guid id)
         {
-            return _context.StaffNames.Any(e => e.Id == id);
+            return context.StaffNames.Any(e => e.Id == id);
         }
     }
 }
